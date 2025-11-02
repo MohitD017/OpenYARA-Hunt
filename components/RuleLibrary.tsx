@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { YaraRule } from '../types';
 import EditRuleModal from './EditRuleModal';
-import { Bot, Pencil, Search, Trash2, Bug } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+import { Bot, Pencil, Search, Trash2, Bug, PlusCircle } from 'lucide-react';
 
 interface RuleLibraryProps {
   rules: YaraRule[];
@@ -85,27 +86,81 @@ const RuleLibrary: React.FC<RuleLibraryProps> = ({ rules, setRules, setActiveVie
     setIsEditModalOpen(true);
   };
   
+  const handleAddNewManualRule = () => {
+    const newRuleId = uuidv4();
+    const ruleName = `New_Rule_${newRuleId.split('-')[0]}`;
+    const today = new Date().toISOString().split('T')[0];
+    const newRule: YaraRule = {
+        id: newRuleId,
+        name: ruleName,
+        category: 'Custom',
+        content: `rule ${ruleName}
+{
+    meta:
+        description = "A new custom rule"
+        author = "Mohit A. Dhabuwala"
+        date = "${today}"
+    strings:
+        $s1 = "example"
+    condition:
+        uint16(0) == 0x5a4d and $s1
+}`,
+        author: 'Mohit A. Dhabuwala',
+        lastModified: today,
+        description: 'A new custom rule',
+        tags: [],
+        cve: [],
+    };
+    setRuleToEdit(newRule);
+    setIsEditModalOpen(true);
+  };
+
   const handleSaveRule = (updatedContent: string, updatedTags: string[], updatedCves: string[]) => {
     if (!ruleToEdit) return;
 
+    // Extract metadata from the rule content itself for consistency.
     const descriptionMatch = updatedContent.match(/description\s*=\s*"([^"]+)"/);
-    const newDescription = descriptionMatch ? descriptionMatch[1] : 'No description provided.';
+    const newDescription = descriptionMatch ? descriptionMatch[1] : ruleToEdit.description;
     
-    setRules(prevRules =>
-      prevRules.map(r =>
-        r.id === ruleToEdit.id
-          ? {
-              ...r,
-              content: updatedContent,
-              description: newDescription,
-              tags: updatedTags,
-              cve: updatedCves,
-              author: 'Mohit A. Dhabuwala',
-              lastModified: new Date().toISOString().split('T')[0],
-            }
-          : r
-      )
-    );
+    const nameMatch = updatedContent.match(/rule\s+(\w+)/);
+    const newName = nameMatch ? nameMatch[1] : ruleToEdit.name;
+
+    const ruleExists = rules.some(r => r.id === ruleToEdit.id);
+    const today = new Date().toISOString().split('T')[0];
+
+    if (ruleExists) {
+      // UPDATE logic
+      setRules(prevRules =>
+        prevRules.map(r =>
+          r.id === ruleToEdit.id
+            ? {
+                ...r, // Preserves original author, etc.
+                name: newName,
+                content: updatedContent,
+                description: newDescription,
+                tags: updatedTags,
+                cve: updatedCves,
+                lastModified: today,
+              }
+            : r
+        )
+      );
+    } else {
+      // ADD logic
+      const newRule: YaraRule = {
+          id: ruleToEdit.id,
+          name: newName,
+          category: ruleToEdit.category, // 'Custom' from handleAddNewManualRule
+          content: updatedContent,
+          author: 'Mohit A. Dhabuwala', // Set author for new manual rule
+          lastModified: today,
+          description: newDescription,
+          tags: updatedTags,
+          cve: updatedCves,
+      };
+      setRules(prevRules => [...prevRules, newRule]);
+    }
+
     setIsEditModalOpen(false);
     setRuleToEdit(null);
   };
@@ -121,13 +176,23 @@ const RuleLibrary: React.FC<RuleLibraryProps> = ({ rules, setRules, setActiveVie
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-white">YARA Rule Library</h1>
-          <button
-            onClick={() => setActiveView('ai-generator')}
-            className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-          >
-            <Bot size={16} />
-            <span>Add New Rule (with AI)</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAddNewManualRule}
+              className="flex items-center gap-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition"
+              title="Create a new YARA rule from a template"
+            >
+              <PlusCircle size={16} />
+              <span>Add New Rule (Manual)</span>
+            </button>
+            <button
+              onClick={() => setActiveView('ai-generator')}
+              className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition"
+            >
+              <Bot size={16} />
+              <span>Add New Rule (with AI)</span>
+            </button>
+          </div>
         </div>
 
         <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
