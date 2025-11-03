@@ -43,13 +43,13 @@ graph TD
 
 ## ✨ Key Features
 
--   **Centralized Rule Library**: Manage your YARA rules with advanced filtering by category, custom tags, and CVE identifiers. Features like manual creation, editing, import/export, and robust search make it a powerful threat intelligence database.
--   **AI-Assisted Rule Generation**: Leverage the Google Gemini API to instantly generate high-quality YARA rules from natural language threat descriptions. Go from concept to a deployable, validated rule in seconds.
--   **Threat Hunt Simulator**: Test and validate your rules against a file corpus before deployment. The simulator provides immediate feedback, a detailed JSON report of matches, and visualizes key performance metrics.
--   **Performance Dashboard**: After a hunt, analyze the results with a dashboard showing metrics like Precision, Recall, F1-Score, and False Positive Rate to understand rule effectiveness.
--   **Built-in Rule Validation**: An integrated syntax checker validates rules on save and provides warnings for AI-generated rules, ensuring the integrity and reliability of your ruleset.
--   **Integrated Forensic Playbooks**: Access ready-to-use Velociraptor playbooks and huntboard templates directly within the application to guide your incident response operations.
--   **Save/Load Configurations**: Save your hunt configurations (selected rules) to your browser's local storage for quick access in future sessions.
+-   **🗂️ Centralized Rule Library**: Manage your YARA rules with advanced filtering by category, custom tags, and CVE identifiers. Features like manual creation, editing, import/export, and robust search make it a powerful threat intelligence database.
+-   **🤖 AI-Assisted Rule Generation**: Leverage the Google Gemini API to instantly generate high-quality YARA rules from natural language threat descriptions. Go from concept to a deployable, validated rule in seconds.
+-   **🎯 Threat Hunt Simulator**: Test and validate your rules against a file corpus before deployment. The simulator provides immediate feedback, a detailed JSON report of matches, and visualizes key performance metrics.
+-   **📊 Performance Dashboard**: After a hunt, analyze the results with a dashboard showing metrics like Precision, Recall, F1-Score, and False Positive Rate to understand rule effectiveness.
+-   **✅ Built-in Rule Validation**: An integrated syntax checker validates rules on save and provides warnings for AI-generated rules, ensuring the integrity and reliability of your ruleset.
+-   **📖 Integrated Forensic Playbooks**: Access ready-to-use Velociraptor playbooks and huntboard templates directly within the application to guide your incident response operations.
+-   **💾 Save/Load Configurations**: Save your hunt configurations (selected rules) to your browser's local storage for quick access in future sessions.
 
 ---
 
@@ -120,6 +120,5 @@ Contributions from the community are welcome and encouraged! Whether you're subm
 Please read our [**CONTRIBUTING.md**](CONTRIBUTING.md) for guidelines on how to get started.
 
 ## 📜 License
-
 
 This project is licensed under the **Apache 2.0 License**. See the `LICENSE` file for details.

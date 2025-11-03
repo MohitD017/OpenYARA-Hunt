@@ -1,5 +1,6 @@
+
 {
-  "name": "Copy of OpenYARA-Hunt",
+  "name": "OpenYARA-Hunt",
   "description": "An interactive web-based interface for OpenYARA-Hunt, an Open YARA Rule Library and CI-driven Threat-Hunting Framework. This application allows users to manage, test, and generate YARA rules with AI assistance, simulate threat hunts, and view forensic playbooks.",
   "requestFramePermissions": []
 }
