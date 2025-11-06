@@ -64,10 +64,10 @@ const Documentation: React.FC = () => {
     }
 
     const content = activeTab === 'readme' ? readmeContent : contributingContent;
-    // Render content line-by-line for better readability with prose styling
+    // Fix: Split content by the correct newline character '\n' instead of '\\n'
     return (
       <div className="prose prose-invert max-w-none prose-h1:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-pre:bg-gray-900 prose-code:text-blue-300">
-        {content.split('\\n').map((line, index) => (
+        {content.split('\n').map((line, index) => (
             <p key={index} className="mb-0">{line || <br />}</p>
         ))}
       </div>

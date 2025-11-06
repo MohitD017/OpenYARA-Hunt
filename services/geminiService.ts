@@ -1,11 +1,8 @@
 import { GoogleGenAI } from "@google/genai";
 
-// Fix: Initialize GoogleGenAI with process.env.API_KEY directly as per coding guidelines.
-// The API key's availability is assumed to be handled externally.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 export const generateYaraRule = async (description: string): Promise<string> => {
-  // Fix: Removed explicit API key check, as its presence is a hard requirement handled externally.
+  // Fix: Per Gemini API guidelines, API key must be from process.env.API_KEY and used directly.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const prompt = `
 You are a senior cybersecurity engineer specializing in YARA rule creation.
@@ -26,7 +23,7 @@ Output *only* the YARA rule code block, enclosed in \`\`\`yara ... \`\`\`. Do no
 
   try {
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-2.5-pro',
       contents: prompt,
     });
     
@@ -46,6 +43,13 @@ Output *only* the YARA rule code block, enclosed in \`\`\`yara ... \`\`\`. Do no
     return text.trim();
   } catch (error) {
     console.error("Error generating YARA rule:", error);
+    if (error instanceof Error) {
+        // Fix: Updated error message to reflect use of process.env.API_KEY.
+        if (error.message.includes('API key not valid')) {
+            throw new Error('Invalid Gemini API key. Please check the API_KEY environment variable.');
+        }
+        throw new Error(`Failed to generate rule from Gemini API: ${error.message}`);
+    }
     throw new Error("Failed to generate YARA rule from Gemini API.");
   }
 };

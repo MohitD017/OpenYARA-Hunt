@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
-import { YaraRule } from '../types';
-import { validateYaraRule } from '../services/yaraValidationService';
+import { YaraRule } from '../types.ts';
+import { validateYaraRule } from '../services/yaraValidationService.ts';
 import { X } from 'lucide-react';
 
 interface EditRuleModalProps {

@@ -1,4 +1,5 @@
-import { YaraRule } from './types';
+
+import { YaraRule } from './types.ts';
 
 export const SAMPLE_RULES: YaraRule[] = [
   {

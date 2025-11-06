@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { YaraRule } from '../types';
-import EditRuleModal from './EditRuleModal';
+
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+import { YaraRule } from '../types.ts';
+import EditRuleModal from './EditRuleModal.tsx';
 import { v4 as uuidv4 } from 'uuid';
-import { Bot, Pencil, Search, Trash2, Bug, PlusCircle } from 'lucide-react';
+import { Bot, Pencil, Search, Trash2, Bug, PlusCircle, Upload, Download } from 'lucide-react';
 
 interface RuleLibraryProps {
   rules: YaraRule[];
@@ -10,10 +11,28 @@ interface RuleLibraryProps {
   setActiveView: (view: string) => void;
 }
 
+const Toast: React.FC<{ message: string; type: 'success' | 'error'; onDismiss: () => void }> = ({ message, type, onDismiss }) => {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 3000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+
+  return (
+    <div className={`fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg z-50 toast-enter ${bgColor}`}>
+      {message}
+    </div>
+  );
+};
+
+
 const RuleLibrary: React.FC<RuleLibraryProps> = ({ rules, setRules, setActiveView }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [ruleToEdit, setRuleToEdit] = useState<YaraRule | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const importFileRef = useRef<HTMLInputElement>(null);
   
   const allCategories = useMemo(() => [...new Set(rules.map(r => r.category))].sort(), [rules]);
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set(allCategories));
@@ -163,34 +182,97 @@ const RuleLibrary: React.FC<RuleLibraryProps> = ({ rules, setRules, setActiveVie
 
     setIsEditModalOpen(false);
     setRuleToEdit(null);
+    setToast({ message: 'Rule saved successfully!', type: 'success' });
   };
   
   const handleDeleteRule = (ruleId: string) => {
     if (window.confirm('Are you sure you want to delete this rule? This action cannot be undone.')) {
       setRules(prevRules => prevRules.filter(r => r.id !== ruleId));
+      setToast({ message: 'Rule deleted.', type: 'success' });
     }
+  };
+
+  const handleExportRules = () => {
+    const dataStr = JSON.stringify(filteredRules, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `yara-rules-export-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    setToast({ message: `${filteredRules.length} rules exported.`, type: 'success' });
+  };
+
+  const handleImportRules = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const importedRules = JSON.parse(text) as YaraRule[];
+        if (!Array.isArray(importedRules)) throw new Error('Invalid format.');
+
+        const existingIds = new Set(rules.map(r => r.id));
+        const newRules = importedRules.filter(r => r.id && !existingIds.has(r.id));
+        
+        setRules(prevRules => [...prevRules, ...newRules]);
+        setToast({ message: `${newRules.length} rules imported. ${importedRules.length - newRules.length} duplicates skipped.`, type: 'success' });
+      } catch (error) {
+        setToast({ message: 'Failed to import rules. Invalid JSON file.', type: 'error' });
+      }
+    };
+    reader.readAsText(file);
+    // Reset file input
+    if(importFileRef.current) importFileRef.current.value = "";
   };
   
   return (
     <>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center flex-wrap gap-4">
           <h1 className="text-3xl font-bold text-white">YARA Rule Library</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={handleAddNewManualRule}
               className="flex items-center gap-2 bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 transition"
               title="Create a new YARA rule from a template"
             >
               <PlusCircle size={16} />
-              <span>Add New Rule (Manual)</span>
+              <span>Add (Manual)</span>
             </button>
             <button
               onClick={() => setActiveView('ai-generator')}
               className="flex items-center gap-2 bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition"
             >
               <Bot size={16} />
-              <span>Add New Rule (with AI)</span>
+              <span>Add (AI)</span>
+            </button>
+            <input
+                type="file"
+                ref={importFileRef}
+                accept=".json"
+                onChange={handleImportRules}
+                className="hidden"
+                id="import-rules-input"
+            />
+            <label
+              htmlFor="import-rules-input"
+              className="flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition cursor-pointer"
+            >
+                <Upload size={16} />
+                <span>Import</span>
+            </label>
+            <button
+              onClick={handleExportRules}
+              className="flex items-center gap-2 bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition"
+              title="Export filtered rules to a JSON file"
+            >
+              <Download size={16} />
+              <span>Export ({filteredRules.length})</span>
             </button>
           </div>
         </div>

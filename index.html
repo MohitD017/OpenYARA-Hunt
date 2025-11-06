@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/index.css">
     <style>
       body {
         font-family: 'Source Sans Pro', sans-serif;
@@ -16,28 +17,46 @@
       .font-mono {
         font-family: 'Roboto Mono', monospace;
       }
+      /* Animation for main view content */
+      .main-content-enter {
+        animation: fadeIn 0.3s ease-in-out;
+      }
+      /* Animations for Toast Notifications */
+      .toast-enter {
+        animation: slideInUp 0.3s ease-out;
+      }
+      .toast-exit {
+        animation: fadeOut 0.3s ease-in forwards;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes slideInUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      @keyframes fadeOut {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
     </style>
   <script type="importmap">
 {
   "imports": {
-    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.27.0",
-    "recharts": "https://aistudiocdn.com/recharts@^3.3.0",
-    "uuid": "https://aistudiocdn.com/uuid@^13.0.0",
-    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.548.0"
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.28.0",
+    "lucide-react": "https://aistudiocdn.com/lucide-react@^0.552.0",
+    "uuid": "https://aistudiocdn.com/uuid@^13.0.0"
   }
 }
 </script>
-<!-- Add Babel Standalone for in-browser transpilation -->
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<link rel="stylesheet" href="/index.css">
 </head>
   <body class="bg-gray-900 text-gray-200">
     <div id="root"></div>
-    <!-- Update script type to be processed by Babel -->
-    <script type="text/babel" data-presets="react,typescript" data-type="module" src="/index.tsx"></script>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>

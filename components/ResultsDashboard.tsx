@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { HuntResult } from '../types';
+import { HuntResult } from '../types.ts';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
 
 interface ResultsDashboardProps {

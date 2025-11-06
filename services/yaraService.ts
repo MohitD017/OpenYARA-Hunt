@@ -1,13 +1,21 @@
 
-import { YaraRule, HuntResult, HuntMetrics, Match } from '../types';
+import { YaraRule, HuntResult, HuntMetrics, Match } from '../types.ts';
 
-// Simple function to extract strings from a YARA rule content
+/**
+ * A simplified function to extract string IOCs from YARA rule content for simulation.
+ * NOTE: This is a basic parser for demonstration and only handles simple double-quoted strings.
+ * It does not support hex strings, regular expressions, or complex conditions.
+ * @param ruleContent The text content of the YARA rule.
+ * @returns An array of string IOCs.
+ */
 const extractStringsFromRule = (ruleContent: string): string[] => {
   const stringsSection = ruleContent.match(/strings:\s*\{([^}]+)\}/s);
   if (!stringsSection) return [];
 
-  const stringLines = stringsSection[1].trim().split('\\n');
+  // Correctly split by newline characters
+  const stringLines = stringsSection[1].trim().split('\n');
   const extracted = stringLines.map(line => {
+    // Match content inside double quotes
     const match = line.match(/=\s*"([^"]+)"/);
     return match ? match[1] : null;
   }).filter((s): s is string => s !== null);
@@ -22,16 +30,13 @@ export const runHunt = async (rules: YaraRule[], files: File[]): Promise<HuntRes
 
   for (const file of files) {
     report[file.name] = [];
+    // Read file content once
     const content = await file.text();
     for (const rule of rules) {
       const ruleStrings = extractStringsFromRule(rule.content);
-      let matched = false;
-      for (const str of ruleStrings) {
-        if (content.includes(str)) {
-          matched = true;
-          break;
-        }
-      }
+      // Use .some for efficiency; it stops on the first match.
+      const matched = ruleStrings.some(str => content.includes(str));
+      
       if (matched) {
         matches.push({ ruleName: rule.name, fileName: file.name });
         if (!report[file.name].includes(rule.name)) {

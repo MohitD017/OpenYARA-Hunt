@@ -1,8 +1,8 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { YaraRule, HuntResult } from '../types';
-import { runHunt } from '../services/yaraService';
-import ResultsDashboard from './ResultsDashboard';
+import { YaraRule, HuntResult } from '../types.ts';
+import { runHunt } from '../services/yaraService.ts';
+import ResultsDashboard from './ResultsDashboard.tsx';
 import { FileUp, Search, X, Loader, Save, FolderOpen, Info } from 'lucide-react';
 
 interface HuntSimulatorProps {
@@ -11,11 +11,26 @@ interface HuntSimulatorProps {
   setHuntResult: React.Dispatch<React.SetStateAction<HuntResult | null>>;
 }
 
+const Toast: React.FC<{ message: string; type: 'success' | 'error'; onDismiss: () => void }> = ({ message, type, onDismiss }) => {
+  useEffect(() => {
+    const timer = setTimeout(onDismiss, 3000);
+    return () => clearTimeout(timer);
+  }, [onDismiss]);
+
+  const bgColor = type === 'success' ? 'bg-green-600' : 'bg-red-600';
+
+  return (
+    <div className={`fixed bottom-5 right-5 text-white py-2 px-4 rounded-lg shadow-lg toast-enter ${bgColor}`}>
+      {message}
+    </div>
+  );
+};
+
 const HuntSimulator: React.FC<HuntSimulatorProps> = ({ rules, huntResult, setHuntResult }) => {
   const [selectedRules, setSelectedRules] = useState<Set<string>>(new Set(rules.map(r => r.id)));
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [status, setStatus] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [isConfigSaved, setIsConfigSaved] = useState(false);
 
   useEffect(() => {
@@ -75,13 +90,13 @@ const HuntSimulator: React.FC<HuntSimulatorProps> = ({ rules, huntResult, setHun
   };
 
   const handleRunHunt = async () => {
-    setStatus(null);
+    setToast(null);
     if (selectedRules.size === 0) {
-      setStatus({ message: "Please select at least one YARA rule.", type: 'error' });
+      setToast({ message: "Please select at least one YARA rule.", type: 'error' });
       return;
     }
     if (files.length === 0) {
-      setStatus({ message: "Please upload at least one file for the test corpus.", type: 'error' });
+      setToast({ message: "Please upload at least one file for the test corpus.", type: 'error' });
       return;
     }
 
@@ -92,7 +107,7 @@ const HuntSimulator: React.FC<HuntSimulatorProps> = ({ rules, huntResult, setHun
       const result = await runHunt(activeRules, files);
       setHuntResult(result);
     } catch (err) {
-      setStatus({ message: "An error occurred during the hunt simulation.", type: 'error' });
+      setToast({ message: "An error occurred during the hunt simulation.", type: 'error' });
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -106,10 +121,9 @@ const HuntSimulator: React.FC<HuntSimulatorProps> = ({ rules, huntResult, setHun
       };
       localStorage.setItem('openYaraHuntConfig', JSON.stringify(config));
       setIsConfigSaved(true);
-      setStatus({ message: 'Hunt configuration saved successfully!', type: 'success' });
-      setTimeout(() => setStatus(null), 3000);
+      setToast({ message: 'Hunt configuration saved successfully!', type: 'success' });
     } catch (e) {
-      setStatus({ message: 'Failed to save configuration.', type: 'error' });
+      setToast({ message: 'Failed to save configuration.', type: 'error' });
     }
   };
 
@@ -119,16 +133,16 @@ const HuntSimulator: React.FC<HuntSimulatorProps> = ({ rules, huntResult, setHun
       try {
         const savedConfig = JSON.parse(savedConfigJSON);
         setSelectedRules(new Set(savedConfig.selectedRuleIds || []));
-        setStatus({ message: 'Hunt configuration loaded!', type: 'success' });
-        setTimeout(() => setStatus(null), 3000);
+        setToast({ message: 'Hunt configuration loaded!', type: 'success' });
       } catch (e) {
-        setStatus({ message: 'Failed to load configuration. It may be corrupted.', type: 'error' });
+        setToast({ message: 'Failed to load configuration. It may be corrupted.', type: 'error' });
       }
     }
   };
 
   return (
     <>
+      {toast && <Toast message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />}
       <div className="space-y-6">
         <h1 className="text-3xl font-bold text-white">Threat Hunt Simulator</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -215,11 +229,6 @@ const HuntSimulator: React.FC<HuntSimulatorProps> = ({ rules, huntResult, setHun
           </div>
 
           <div className="text-center">
-            {status && (
-              <p className={`mb-4 ${status.type === 'error' ? 'text-red-400' : 'text-green-400'}`}>
-                {status.message}
-              </p>
-            )}
             <button
               onClick={handleRunHunt}
               disabled={isLoading}

@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import SideNav from './components/SideNav';
-import HuntSimulator from './components/HuntSimulator';
-import AiRuleGenerator from './components/AiRuleGenerator';
-import PlaybookViewer from './components/PlaybookViewer';
-import Documentation from './components/Documentation';
-import RuleLibrary from './components/RuleLibrary';
-import { SAMPLE_RULES } from './constants';
-import { HuntResult, YaraRule } from './types';
+import SideNav from './components/SideNav.tsx';
+import HuntSimulator from './components/HuntSimulator.tsx';
+import AiRuleGenerator from './components/AiRuleGenerator.tsx';
+import PlaybookViewer from './components/PlaybookViewer.tsx';
+import Documentation from './components/Documentation.tsx';
+import RuleLibrary from './components/RuleLibrary.tsx';
+import { SAMPLE_RULES } from './constants.ts';
+import { HuntResult, YaraRule } from './types.ts';
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState('hunt');
@@ -40,7 +40,9 @@ const App: React.FC = () => {
     <div className="flex h-screen bg-gray-900 text-gray-200">
       <SideNav activeView={activeView} setActiveView={setActiveView} />
       <main className="flex-1 p-4 md:p-8 overflow-y-auto">
-        {renderView()}
+        <div key={activeView} className="main-content-enter">
+            {renderView()}
+        </div>
       </main>
     </div>
   );
