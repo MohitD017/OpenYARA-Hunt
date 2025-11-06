@@ -1,78 +1,64 @@
-import React, { useState, useEffect } from 'react';
-import { Loader } from 'lucide-react';
+import React, { useState } from 'react';
+import { ETHICAL_USE_GUIDE, CONTRIBUTING_GUIDE } from '../constants/documentation.ts';
+
+/**
+ * A simple component to render Markdown-like text into React elements.
+ * This supports a limited subset of Markdown:
+ * - `# Heading 1`
+ * - `### Heading 3`
+ * - `**bold text**`
+ * - ``code``
+ * - List items starting with `-` or a number.
+ * - Horizontal rules with `---`
+ */
+const SimpleMarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
+    const lines = content.trim().split('\n');
+    const elements: React.ReactNode[] = [];
+    let listItems: string[] = [];
+
+    const flushList = () => {
+        if (listItems.length > 0) {
+            elements.push(
+                <ul key={elements.length} className="list-disc list-inside space-y-2 my-4">
+                    {listItems.map((item, index) => (
+                        <li key={index} dangerouslySetInnerHTML={{ __html: item }} />
+                    ))}
+                </ul>
+            );
+            listItems = [];
+        }
+    };
+    
+    lines.forEach((line, i) => {
+        // Bold and Code formatting
+        const formattedLine = line
+            .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+            .replace(/`([^`]+)`/g, '<code class="bg-gray-900 text-blue-300 px-1.5 py-0.5 rounded-md font-mono text-sm">$1</code>');
+
+        if (formattedLine.startsWith('# ')) {
+            flushList();
+            elements.push(<h1 key={i} className="text-2xl font-bold mb-4 text-white">{formattedLine.substring(2)}</h1>);
+        } else if (formattedLine.startsWith('### ')) {
+            flushList();
+            elements.push(<h3 key={i} className="text-xl font-semibold mt-6 mb-2 text-gray-200">{formattedLine.substring(4)}</h3>);
+        } else if (formattedLine.startsWith('- ') || /^\d+\.\s/.test(formattedLine)) {
+            listItems.push(formattedLine.replace(/^\s*-\s*|^\d+\.\s*/, ''));
+        } else if (formattedLine.trim() === '---') {
+            flushList();
+            elements.push(<hr key={i} className="my-6 border-gray-700" />);
+        } else if (formattedLine.trim() !== '') {
+            flushList();
+            elements.push(<p key={i} dangerouslySetInnerHTML={{ __html: formattedLine }} className="text-gray-300 leading-relaxed my-2" />);
+        }
+    });
+
+    flushList(); // Ensure the last list is rendered
+    return <>{elements}</>;
+};
+
 
 const Documentation: React.FC = () => {
-  const [activeTab, setActiveTab] = useState('readme');
-  const [readmeContent, setReadmeContent] = useState('');
-  const [contributingContent, setContributingContent] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const [readmeResponse, contributingResponse] = await Promise.all([
-          fetch('./README.md'),
-          fetch('./CONTRIBUTING.md')
-        ]);
-
-        if (!readmeResponse.ok) {
-          throw new Error(`Failed to load README.md: ${readmeResponse.statusText}`);
-        }
-        if (!contributingResponse.ok) {
-          throw new Error(`Failed to load CONTRIBUTING.md: ${contributingResponse.statusText}`);
-        }
-
-        const readmeText = await readmeResponse.text();
-        const contributingText = await contributingResponse.text();
-        
-        setReadmeContent(readmeText);
-        setContributingContent(contributingText);
-      } catch (e) {
-        if (e instanceof Error) {
-            setError(e.message);
-        } else {
-            setError('An unknown error occurred while fetching documentation.');
-        }
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDocs();
-  }, []);
-
-  const renderContent = () => {
-    if (loading) {
-      return (
-        <div className="flex items-center justify-center h-64">
-          <Loader className="animate-spin" size={32} />
-          <p className="ml-4">Loading Documentation...</p>
-        </div>
-      );
-    }
-    if (error) {
-        return (
-            <div className="text-red-400 bg-red-900 border border-red-500 p-4 rounded-md">
-                <p className="font-bold">Error loading documentation:</p>
-                <p>{error}</p>
-                <p className="mt-2 text-sm text-red-300">Please ensure README.md and CONTRIBUTING.md are present in the project root and the local server is running correctly.</p>
-            </div>
-        );
-    }
-
-    const content = activeTab === 'readme' ? readmeContent : contributingContent;
-    // Fix: Split content by the correct newline character '\n' instead of '\\n'
-    return (
-      <div className="prose prose-invert max-w-none prose-h1:text-white prose-p:text-gray-300 prose-li:text-gray-300 prose-pre:bg-gray-900 prose-code:text-blue-300">
-        {content.split('\n').map((line, index) => (
-            <p key={index} className="mb-0">{line || <br />}</p>
-        ))}
-      </div>
-    );
-  };
+  const [activeTab, setActiveTab] = useState('ethical-use');
 
   return (
     <div className="space-y-6">
@@ -81,12 +67,12 @@ const Documentation: React.FC = () => {
         <div className="border-b border-gray-700">
           <nav className="flex space-x-4 p-4" aria-label="Tabs">
             <button
-              onClick={() => setActiveTab('readme')}
+              onClick={() => setActiveTab('ethical-use')}
               className={`px-3 py-2 font-medium text-sm rounded-md ${
-                activeTab === 'readme' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'
+                activeTab === 'ethical-use' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700'
               }`}
             >
-              README.md
+              Ethical Use Guide
             </button>
             <button
               onClick={() => setActiveTab('contributing')}
@@ -99,7 +85,9 @@ const Documentation: React.FC = () => {
           </nav>
         </div>
         <div className="p-6">
-          {renderContent()}
+          <div className="max-w-none">
+             <SimpleMarkdownRenderer content={activeTab === 'ethical-use' ? ETHICAL_USE_GUIDE : CONTRIBUTING_GUIDE} />
+          </div>
         </div>
       </div>
     </div>
