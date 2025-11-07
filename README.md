@@ -1,4 +1,4 @@
-# OpenYARA-Hunt: Interactive Threat Hunting Command Center
+# 🛡️ OpenYARA-Hunt: Interactive Threat Hunting Command Center
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Contributions Welcome](https://img.shields.io/badge/Contributions-welcome-brightgreen.svg?style=flat)](CONTRIBUTING.md)
@@ -20,7 +20,7 @@
 
 ---
 
-## Application Workflow
+## 🚀 Application Workflow
 
 This flowchart illustrates the core user journey within OpenYARA-Hunt, from building your rule library to analyzing hunt results and taking action.
 ```mermaid
@@ -48,8 +48,6 @@ graph TD
 
     C5 --> D1;
 ```
-
----
 
 ## Technology Stack
 
@@ -159,3 +157,4 @@ Contributions from the community are welcome and encouraged! Please read our [**
 ## License
 
 This project is licensed under the **Apache 2.0 License**. See the `LICENSE` file for details.
+
