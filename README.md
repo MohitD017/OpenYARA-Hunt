@@ -10,7 +10,7 @@
 
 ## Key Features
 
--   **Centralized Rule Library**: Manage your YARA rules with advanced filtering by category, custom tags, and CVE identifiers. Features like manual creation, editing, import/export, and robust search make it a powerful threat intelligence database.
+-   **Centralized Rule Library**: Manage your YARA rules with advanced filtering by category, custom tags, and CVE identifiers. Features like manual creation, editing, import/export, and robust search make it a powerful threat intelligence database. **_The library is actively maintained, with new rules added periodically to keep your threat hunting capabilities up to date_**.
 -   **Secure AI-Assisted Rule Generation**: Leverage the Google Gemini API via a secure backend proxy to instantly generate high-quality YARA rules from natural language threat descriptions. The API key is never exposed to the client.
 -   **Threat Hunt Simulator**: Test and validate your rules against a file corpus before deployment. The simulator provides immediate feedback, a detailed JSON report of matches, and visualizes key performance metrics.
 -   **Performance Dashboard**: After a hunt, analyze the results with a dashboard showing metrics like Precision, Recall, F1-Score, and False Positive Rate to understand rule effectiveness.
@@ -20,7 +20,25 @@
 
 ---
 
-## 🚀 Application Workflow
+## Citation
+
+If you find this work helpful or if it has made a difference in your research, please consider giving it a citation. It will motivate me to continue developing meaningful tools and will also help build my professional profile.
+
+You can use the following BibTeX entry to cite this project:
+
+```bibtex
+@software{OpenYARA-Hunt_2025,
+  author = {Dhabuwala, Mohit Ajaykumar},
+  title = {{OpenYARA-Hunt: Interactive Threat Hunting Command Center}},
+  year = {2025},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/MohitD017/OpenYARA-Hunt}}
+}
+```
+
+
+## Application Workflow
 
 This flowchart illustrates the core user journey within OpenYARA-Hunt, from building your rule library to analyzing hunt results and taking action.
 ```mermaid
@@ -55,7 +73,7 @@ graph TD
 -   **Backend Proxy**: Serverless Function (e.g., Cloudflare Workers, Vercel Functions)
 -   **Build Tool**: Vite
 -   **Styling**: Tailwind CSS
--   **AI Integration**: Google Gemini API
+-   **AI Integration**: Google Gemini API (AI use is optional)
 -   **Icons**: Lucide React
 -   **Charts**: Recharts
 
@@ -102,13 +120,13 @@ For local development, the application makes direct calls to the Gemini API from
     ```
     API_KEY=your_gemini_api_key_here
     ```
-    You can use any of the text editors like `Sublime Text`, `Notepad++`, or `VS Code` whichever you feel comfortable with.
+    You can use any of the text editors like `Sublime Text`, `Notepad++`, or `VS Code`, whichever you feel comfortable with.
 
 4.  **Run the dev server:**
     ```bash
     npm run dev
     ```
-    Open your browser to the local URL provided (e.g., `http://localhost:5173`).
+    Open your browser to the local URL provided in the command prompt (e.g., `http://localhost:3000`).
 
 
 ### Step 5: Deploying for Full Functionality (Recommended)
@@ -157,4 +175,5 @@ Contributions from the community are welcome and encouraged! Please read our [**
 ## License
 
 This project is licensed under the **Apache 2.0 License**. See the `LICENSE` file for details.
+
 
